@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Bắn Đại Bàng </title>
+    <link rel="stylesheet" href="myCss.css">
+
+
+</head>
+<body>
+<table>
+    <tr>
+        <td>
+            <canvas id="myCanvas" width="800" height="500" style="border: 1px solid black"></canvas>
+        </td>
+        <td>
+            <form id="myForm">
+                <label for="myForm">Player Game</label>
+                <input type="text">
+                <p>The eagle's blood :</p>
+                <p id="score"></p>
+                <button id="play">Start</button>
+            </form>
+
+        </td>
+    </tr>
+</table>
+
+
+<script src="myJs/Bullet.js"></script>
+<script src="myJs/Eagle.js"></script>
+<script src="myJs/Gun.js"></script>
+<script>
+    let cvs = document.getElementById('myCanvas');
+    let ctx = cvs.getContext('2d');
+    var count = 10;
+    document.getElementById("score").innerHTML = count;
+
+
+    ctx.beginPath();
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = "red";
+    ctx.font = "50px Arial "
+    ctx.fillText("Warning !!!", 300, 100);
+    ctx.closePath();
+
+
+    ctx.beginPath();
+    ctx.fillStyle = "white"
+    ctx.font = "20px Arial";
+    ctx.fillText("Có một con \" Đại Bàng Quỷ\" xuất hiện trên bầu trời ", 200, 150);
+    ctx.fillText("Hãy dùng khẩu súng chấn yêu để tiêu diệt nó ", 200, 180);
+    ctx.fillText("Đại Bàng sẽ bị tiêu diệt nếu hết máu ", 200, 210);
+    ctx.fillText("Chúc Bạn May Mắn !!! ", 200, 240);
+    ctx.closePath();
+
+
+    let gun = new Gun(750, 460);
+    window.addEventListener('mousemove', function Mousemove(e) {
+        let x = e.pageX - cvs.offsetLeft;
+        let y = e.pageY - cvs.offsetTop;
+        gun.angleGun(x, y);
+    })
+
+    let play = document.getElementById("play");
+    play.addEventListener("click", function game(event) {
+        animate();
+    })
+
+
+    let animationID;
+
+    function animate() {
+        animationID = requestAnimationFrame(animate)
+        ctx.clearRect(0, 0, cvs.width, cvs.height)
+        gun.drawGun();
+        eagle.forEach((eagles) => {
+            eagles.draw();
+            eagles.run();
+        });
+
+        projectiles.forEach((projectile) => {
+            projectile.update();
+        });
+
+        projectiles.forEach((projectile, index1) => {
+            eagle.forEach((eagles, index) => {
+                if (projectile.x > eagles.x && projectile.y > eagles.y
+                    && projectile.x < eagles.x + 50 && projectile.y < eagles.y + 50) {
+                    projectiles.splice(index1, 1);
+                    eagle.splice(index, 1);
+                    count--;
+                    if (count === 0) {
+                        ctx.fillStyle = "#fd0800"
+                        ctx.font = "150px Arial";
+                        ctx.fillText("You Win !!!", cvs.width - 750, cvs.height - 250);
+
+                        cancelAnimationFrame(animationID)
+                    }
+                    document.getElementById('score').innerHTML = count;
+                }
+            })
+        })
+
+    }
+
+
+    let projectiles = [];
+    cvs.addEventListener('click', function (event) {
+        let angle = Math.atan2(
+            cvs.height - event.clientY,
+            cvs.width - event.clientX
+        )
+        let speed = {
+            x: Math.cos(angle),
+            y: Math.sin(angle)
+
+        };
+        projectiles.push(new Bullet(750, 460, 10, speed))
+
+    })
+
+
+</script>
+</body>
+
+</html>
