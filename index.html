@@ -14,14 +14,14 @@
             <canvas id="myCanvas" width="800" height="500" style="border: 1px solid black"></canvas>
         </td>
         <td>
-            <form id="myForm">
-                <label for="myForm">Player Game</label>
-                <input type="text">
-                <p>The eagle's blood :</p>
-                <p id="score"></p>
+            <fieldset>
+                <legend><h2>Let's Play</h2></legend>
+                <p>Player Game:<span><input type="text" oninput="this.value"></span></p>
+                <p>The eagle's blood : <span id="score"></span></p>
+                <p>Time : <span id="time"></span></p>
                 <button id="play">Start</button>
-            </form>
-
+                <button onclick="location.reload()">Restart</button>
+            </fieldset>
         </td>
     </tr>
 </table>
@@ -33,8 +33,19 @@
 <script>
     let cvs = document.getElementById('myCanvas');
     let ctx = cvs.getContext('2d');
-    var count = 10;
+    var count = 100;
+    var widthBlood = 100;
+    var setBlood = widthBlood / count;
+
+
+    let countTime = 0;
+    let setTime = 2000;
+    let timeLine = (setTime * count * 1.5) / 1000;
     document.getElementById("score").innerHTML = count;
+
+
+    let audio = new Audio();
+    audio.src = "audio/fly.mp3";
 
 
     ctx.beginPath();
@@ -52,7 +63,8 @@
     ctx.fillText("Có một con \" Đại Bàng Quỷ\" xuất hiện trên bầu trời ", 200, 150);
     ctx.fillText("Hãy dùng khẩu súng chấn yêu để tiêu diệt nó ", 200, 180);
     ctx.fillText("Đại Bàng sẽ bị tiêu diệt nếu hết máu ", 200, 210);
-    ctx.fillText("Chúc Bạn May Mắn !!! ", 200, 240);
+    ctx.fillText("Bạn có " + timeLine + "s để tiêu diệt Đại Bàng ", 200, 240);
+    ctx.fillText("Chúc Bạn May Mắn !!! ", 200, 270);
     ctx.closePath();
 
 
@@ -63,9 +75,24 @@
         gun.angleGun(x, y);
     })
 
+    function time() {
+        countTime++
+        document.getElementById('time').innerHTML = countTime + "/" + timeLine;
+        if (countTime >= timeLine) {
+            ctx.fillStyle = "#fd0800";
+            ctx.font = "150px Arial";
+            ctx.fillText("You Lose", cvs.width - 750, cvs.height - 250);
+            cancelAnimationFrame(animationID);
+            clearInterval(check);
+        }
+    }
+
     let play = document.getElementById("play");
     play.addEventListener("click", function game(event) {
         animate();
+        play.style.display = "none";
+        check = setInterval(time, 1000);
+
     })
 
 
@@ -73,41 +100,49 @@
 
     function animate() {
         animationID = requestAnimationFrame(animate)
-        ctx.clearRect(0, 0, cvs.width, cvs.height)
-        gun.drawGun();
+        audio.play();
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
         eagle.forEach((eagles) => {
             eagles.draw();
             eagles.run();
+            eagles.blood();
         });
 
         projectiles.forEach((projectile) => {
             projectile.update();
+            projectile.draw();
+
         });
+
 
         projectiles.forEach((projectile, index1) => {
             eagle.forEach((eagles, index) => {
-                if (projectile.x > eagles.x && projectile.y > eagles.y
+                if (projectile.x > eagles.x + 30 && projectile.y + 30 > eagles.y
                     && projectile.x < eagles.x + 50 && projectile.y < eagles.y + 50) {
                     projectiles.splice(index1, 1);
                     eagle.splice(index, 1);
                     count--;
+                    widthBlood = widthBlood - setBlood;
+                    console.log(widthBlood);
+
                     if (count === 0) {
                         ctx.fillStyle = "#fd0800"
                         ctx.font = "150px Arial";
                         ctx.fillText("You Win !!!", cvs.width - 750, cvs.height - 250);
+                        cancelAnimationFrame(animationID);
 
-                        cancelAnimationFrame(animationID)
                     }
+
                     document.getElementById('score').innerHTML = count;
                 }
             })
-        })
-
+        });
+        gun.drawGun();
     }
 
-
     let projectiles = [];
-    cvs.addEventListener('click', function (event) {
+    window.addEventListener('click', function (event) {
         let angle = Math.atan2(
             cvs.height - event.clientY,
             cvs.width - event.clientX
@@ -118,6 +153,7 @@
 
         };
         projectiles.push(new Bullet(750, 460, 10, speed))
+
 
     })
 

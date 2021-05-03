@@ -39,15 +39,24 @@ class Eagle {
         ctx.fill();
     }
 
+    blood() {
+        ctx.beginPath();
+        ctx.fillStyle = "#fd0000"
+        ctx.fillRect(this.x - 5, this.y - 10, widthBlood, 10)
+        ctx.fillStyle = "#2ffd01"
+        ctx.fillRect(this.x - 5, this.y - 10, widthBlood, 10);
+        ctx.closePath();
+    }
+
 
     run() {
         if (this.loaded === false) return;
-        this.draw()
+        this.draw();
         this.update();
         this.x += this.speed;
-        if (this.x >= 700) {
-            this.x = 0;
-        }
+        // if (this.x >= 700) {
+        //     this.x = 0;
+        // }
         gun.drawGun();
     }
 
@@ -77,12 +86,12 @@ let eagle = [];
 
 function spawnEagle() {
     setInterval(() => {
-        let x = Math.random() * 600;
+        let x = Math.random() * 800;
         let y = Math.random() * 200;
         let url = "picture/eagle.png"
         eagle.push(new Eagle(x, y, url))
 
-    }, 2000)
+    }, 2000);
 }
 
 spawnEagle();

@@ -15,11 +15,11 @@ class Bullet {
     }
 
     update(){
-        this.draw();
         this.x -= this.speed.x * 10;
         this.y -= this.speed.y * 10;
     }
 }
+
 
 
 
